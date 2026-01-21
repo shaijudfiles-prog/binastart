@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>כיתות ג׳–ד׳ | משחקון עצמאי: איך בינה יוצרת עובדת?</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --text:#eaf0ff;
+      --muted:#b8c4ff;
+      --line: rgba(255,255,255,.10);
+      --shadow: 0 16px 40px rgba(0,0,0,.35);
+      --r:18px;
+      --r2:14px;
+      --good: rgba(97,255,182,.10);
+      --bad: rgba(255,110,138,.10);
+      --warn: rgba(255,213,106,.10);
+      --font: system-ui, -apple-system, "Segoe UI", "Heebo", "Arial", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      background:
+        radial-gradient(1100px 600px at 20% 10%, rgba(110,231,255,.12), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(97,255,182,.10), transparent 65%),
+        radial-gradient(900px 500px at 50% 100%, rgba(255,110,138,.10), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:18px;
+    }
+    .app{width:min(1060px,100%);}
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:14px 16px;
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .brand{display:flex; gap:10px; align-items:center;}
+    .logo{
+      width:44px; height:44px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(110,231,255,.95), rgba(97,255,182,.85));
+      display:grid; place-items:center;
+      color:#001018;
+      font-weight:900;
+      letter-spacing:.4px;
+    }
+    .title h1{margin:0; font-size:18px;}
+    .title p{margin:2px 0 0; font-size:12px; color:var(--muted); line-height:1.4;}
+    .stats{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--muted);}
+    .pill{padding:6px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(255,255,255,.03);}
+    .progress{height:10px; width:260px; border-radius:999px; border:1px solid var(--line); background: rgba(255,255,255,.03); overflow:hidden;}
+    .progress>div{height:100%; width:0%; background: linear-gradient(90deg, rgba(110,231,255,.9), rgba(97,255,182,.85)); transition: width .35s ease;}
+
+    .grid{margin-top:14px; display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;}
+    @media (max-width: 920px){ .grid{grid-template-columns:1fr;} .progress{width:180px;} }
+
+    .card{
+      background: rgba(18,26,51,.86);
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    h2{margin:0 0 8px; font-size:18px;}
+    h3{margin:0 0 8px; font-size:15px;}
+    .muted{color:var(--muted); font-size:13px; line-height:1.55;}
+    .divider{height:1px; background:var(--line); margin:14px 0;}
+    .big{font-size:16px; line-height:1.65;}
+    .kbd{
+      display:inline-block;
+      font-size:12px;
+      border:1px solid var(--line);
+      padding:2px 7px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      vertical-align: middle;
+    }
+    .choicegrid{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-top:10px;}
+    @media (max-width:560px){ .choicegrid{grid-template-columns:1fr;} }
+    .choice{
+      text-align:right;
+      padding:12px;
+      border-radius: var(--r2);
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      min-height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .choice .tag{
+      font-size:12px;
+      color: var(--muted);
+      border:1px solid var(--line);
+      padding:4px 8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.02);
+      white-space:nowrap;
+    }
+    .choice.correct{border-color: rgba(97,255,182,.40); background: var(--good);}
+    .choice.wrong{border-color: rgba(255,110,138,.40); background: var(--bad);}
+
+    .toast{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-size:13px;
+      line-height:1.55;
+    }
+    .toast.good{border-color: rgba(97,255,182,.35); background: var(--good);}
+    .toast.warn{border-color: rgba(255,213,106,.35); background: var(--warn);}
+    .toast.bad{border-color: rgba(255,110,138,.35); background: var(--bad);}
+
+    .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    button{
+      font-family:var(--font);
+      cursor:pointer;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 14px;
+      transition: transform .05s ease, background .2s ease, border-color .2s ease;
+      text-align:right;
+    }
+    button:hover{background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18);}
+    button:active{transform: translateY(1px);}
+    .primary{
+      background: linear-gradient(135deg, rgba(110,231,255,.95), rgba(97,255,182,.85));
+      color:#001018;
+      border-color: transparent;
+      font-weight:700;
+    }
+    .ghost{opacity:.9}
+    .smalllist{padding-right:18px; margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.7;}
+
+    .stickers{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+    .st{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .st.on{
+      border-color: rgba(97,255,182,.35);
+      background: rgba(97,255,182,.10);
+      color: var(--text);
+    }
+
+    textarea, input[type="text"]{
+      width:100%;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding:10px 12px;
+      font-family: var(--font);
+      font-size:14px;
+      outline:none;
+    }
+    textarea{min-height:90px; resize:vertical;}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    @media (max-width:560px){ .twoCol{grid-template-columns:1fr;} }
+    .badge{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">AI</div>
+        <div class="title">
+          <h1>משחקון עבודה עצמאית (כיתות ג׳–ד׳)</h1>
+          <p>לומדים ב־20–35 דקות: דפוסים → ניחוש → אימון → ניסוח בקשה → בדיקת אמינות + סיכום אישי</p>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="pill">כוכבים: <b id="score">0</b> ⭐</div>
+        <div class="pill">משימה: <b id="task">1</b>/<span id="taskTotal">12</span></div>
+        <div class="progress" aria-label="progress"><div id="prog"></div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="main"></div>
+
+      <div class="card">
+        <h3>תובנות (ממש קצר)</h3>
+        <div class="muted">
+          <ul class="smalllist">
+            <li><b>דפוסים:</b> הבינה לומדת “מה חוזר הרבה”.</li>
+            <li><b>ניחוש:</b> היא בוחרת מה נראה הכי מתאים להמשך.</li>
+            <li><b>אימון:</b> מה שהיא “קראה” משפיע על התשובה.</li>
+            <li><b>ניסוח:</b> בקשה ברורה עוזרת להצליח.</li>
+            <li><b>אמינות:</b> לפעמים חייבים לבדוק מקור.</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>אלבום מדבקות</h3>
+        <div class="muted">אספו מדבקות ע"י הצלחות בשלבים.</div>
+        <div class="stickers" id="stickers"></div>
+
+        <div class="divider"></div>
+
+        <h3>כפתורי עזרה</h3>
+        <div class="btnrow">
+          <button class="ghost" id="saveBtn">שמור/י התקדמות</button>
+          <button class="ghost" id="loadBtn">טען/י</button>
+          <button class="ghost" id="resetBtn">איפוס</button>
+        </div>
+        <div class="muted" style="margin-top:8px;">
+          שמירה נשמרת במחשב הזה (לא נשלח לשום מקום).
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------------------------
+   Content: 12 tasks (half-lesson)
+----------------------------*/
+const STICKERS = [
+  {id:"pattern", label:"🔎 מצאתי דפוס"},
+  {id:"guess",   label:"🧠 ניחוש חכם"},
+  {id:"train",   label:"📚 אימון"},
+  {id:"prompt",  label:"✍️ ניסוח ברור"},
+  {id:"check",   label:"✅ בדיקת אמינות"},
+  {id:"reflect", label:"💬 סיכום אישי"},
+];
+
+const TASKS = [
+  // 1-2 Patterns (abstract but age-friendly)
+  {
+    kind:"mcq",
+    module:"דפוסים",
+    sticker:"pattern",
+    title:"משימה 1: דפוס של צבעים",
+    q:"המשך/י את הדפוס:  🔴  🟦  🔴  🟦  🔴  ___",
+    options:["🟦","🔴","🟩","⭐"],
+    correct:"🟦",
+    why:"זה דפוס חוזר: אדום–כחול–אדום–כחול…"
+  },
+  {
+    kind:"mcq",
+    module:"דפוסים",
+    sticker:"pattern",
+    title:"משימה 2: דפוס של מילים",
+    q:"המשך/י את הדפוס:  שקט, רועש, שקט, רועש, שקט, ___",
+    options:["רועש","שקט","מתוק","חם"],
+    correct:"רועש",
+    why:"המילים מתחלפות: שקט–רועש."
+  },
+
+  // 3-5 Guessing next (language prediction)
+  {
+    kind:"mcq",
+    module:"ניחוש",
+    sticker:"guess",
+    title:"משימה 3: ניחוש לפי הקשר",
+    q:"השלם/י: “בגן המשחקים אני עולה על ה___”",
+    options:["נדנדה","מקרר","מספריים","סבון"],
+    correct:"נדנדה",
+    why:"הקשר “גן המשחקים” מכוון לניחוש של משהו שנמצא שם."
+  },
+  {
+    kind:"mcq",
+    module:"ניחוש",
+    sticker:"guess",
+    title:"משימה 4: ניחוש לפי פעולה",
+    q:"השלם/י: “כדי לצייר אני צריך/ה ___”",
+    options:["עיפרון","כרית","מנעול","כפית"],
+    correct:"עיפרון",
+    why:"לצייר → עיפרון/טוש. הבינה נמשכת למה שנפוץ בדוגמאות."
+  },
+  {
+    kind:"mcq",
+    module:"ניחוש",
+    sticker:"guess",
+    title:"משימה 5: אותו משפט – שתי אפשרויות סבירות",
+    q:"השלם/י: “הכלב רץ אחרי ה___”",
+    options:["כדור","מחשב","מזלג","בגד"],
+    correct:"כדור",
+    why:"יש כמה אפשרויות סבירות, אבל “כלב רץ אחרי כדור” מאוד נפוץ."
+  },
+
+  // 6-7 Training (bias of data) – more abstract idea
+  {
+    kind:"chooseTrain",
+    module:"אימון",
+    sticker:"train",
+    title:"משימה 6: בוחרים אימון",
+    q:"דמיינו שהבינה קראה המון סיפורים על נושא אחד. בחרו על מה היא קראה:",
+    trainOptions:[
+      {key:"חיות", label:"חיות", hint:"כלב, חתול, אריה…"},
+      {key:"חלל", label:"חלל", hint:"כוכבים, טיל, ירח…"},
+      {key:"אגדות", label:"אגדות", hint:"קסם, דרקון, נסיך…"},
+      {key:"כללי", label:"כללי", hint:"קצת מהכול"}
+    ]
+  },
+  {
+    kind:"trainTest",
+    module:"אימון",
+    sticker:"train",
+    title:"משימה 7: רואים איך האימון משפיע",
+    q:"עכשיו בדיקה: השלימו “הלילה ראיתי …” (מה הבינה תבחר?)",
+    outputs:{
+      "חיות":  {text:"חתול קטן בחוץ", reason:"כי היא ראתה המון טקסטים על חיות."},
+      "חלל":   {text:"כוכב נוצץ בשמיים", reason:"כי נושאי חלל הופיעו הרבה באימון."},
+      "אגדות": {text:"דרקון מעופף", reason:"כי באגדות יש יצורים קסומים."},
+      "כללי":  {text:"משהו מעניין", reason:"כי זה אימון מגוון ולא ממוקד."}
+    },
+    why:"האימון משנה אילו רעיונות “קופצים” ראשון."
+  },
+
+  // 8-10 Prompting: clarity, constraints, examples
+  {
+    kind:"comparePrompts",
+    module:"ניסוח בקשה",
+    sticker:"prompt",
+    title:"משימה 8: למה בקשה ברורה חשובה?",
+    left:{title:"בקשה כללית", text:"תכתוב לי סיפור."},
+    right:{title:"בקשה ברורה", text:"תכתוב סיפור קצר (6 משפטים) על ילדה שמוצאת מפה סודית. שיהיה מצחיק, ובסוף היא מחזירה את המפה."},
+    note:"ככל שהבקשה ברורה יותר (כמה? על מה? איזה סגנון?) — הבינה יכולה לנחש תשובה מתאימה יותר."
+  },
+  {
+    kind:"mcq",
+    module:"ניסוח בקשה",
+    sticker:"prompt",
+    title:"משימה 9: בוחרים בקשה טובה",
+    q:"איזו בקשה תעזור לבינה לתת תשובה טובה יותר?",
+    options:[
+      "תעשה משהו מגניב",
+      "תביא לי הכל",
+      "תן לי 3 רעיונות לפוסטר על חברות, עם כותרת לכל רעיון",
+      "תכתוב מלא דברים"
+    ],
+    correct:"תן לי 3 רעיונות לפוסטר על חברות, עם כותרת לכל רעיון",
+    why:"זו בקשה שמסבירה בדיוק מה רוצים וכמה."
+  },
+  {
+    kind:"buildPrompt",
+    module:"ניסוח בקשה",
+    sticker:"prompt",
+    title:"משימה 10: אתם בונים בקשה (פרומפט)",
+    q:"בחרו נושא, ואז כתבו בקשה ברורה לבינה:",
+    fields:[
+      {id:"topic", label:"נושא (למשל: חברות / טבע / חלל / ספורט)", type:"text", placeholder:"הקלד/י נושא…"},
+      {id:"count", label:"כמה דברים את/ה רוצה? (למשל 3 רעיונות / 5 משפטים)", type:"text", placeholder:"הקלד/י כמות…"},
+      {id:"style", label:"סגנון (מצחיק / רציני / קצר / עם שאלות)", type:"text", placeholder:"הקלד/י סגנון…"},
+      {id:"details", label:"פרטים חשובים (מה חייב להופיע?)", type:"text", placeholder:"הקלד/י פרט/ים…"}
+    ],
+    checkHint:"בדיקה: האם כתבת מה, כמה, על מה, ואיזה סגנון?"
+  },
+
+  // 11 Reliability
+  {
+    kind:"mcq",
+    module:"אמינות",
+    sticker:"check",
+    title:"משימה 11: מתי לא מנחשים?",
+    q:"שאלה: כמה ילדים יש עכשיו בכיתה שלך (ברגע זה)?",
+    options:["25","30","צריך לבדוק – הבינה לא יודעת"],
+    correct:"צריך לבדוק – הבינה לא יודעת",
+    why:"כשהמידע לא נמצא אצל הבינה ובטח לא בזמן אמת — לא מנחשים."
+  },
+
+  // 12 Reflection (insights)
+  {
+    kind:"reflection",
+    module:"סיכום",
+    sticker:"reflect",
+    title:"משימה 12: סיכום אישי",
+    q:"כתבו 2–3 משפטים:",
+    prompts:[
+      "דבר אחד שלמדתי על בינה (דפוסים/ניחוש/אימון)…",
+      "דוגמה לבקשה ברורה שאני יכול/ה לכתוב…",
+      "מתי צריך לבדוק מקור ולא להסתמך על צ׳אט?"
+    ]
+  }
+];
+
+/* ---------------------------
+   State + persistence
+----------------------------*/
+const STORAGE_KEY = "ai_kids_gd_v1";
+
+let state = {
+  i: 0,               // task index
+  stars: 0,
+  earned: {},         // stickerId -> true
+  train: "כללי",
+  answers: {},        // taskIndex -> data (for reflection / prompt)
+};
+
+document.getElementById("taskTotal").textContent = TASKS.length;
+
+function clamp(n,min,max){return Math.max(min, Math.min(max,n));}
+function esc(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function updateTop(){
+  document.getElementById("score").textContent = state.stars;
+  document.getElementById("task").textContent = (state.i + 1);
+  const pct = (state.i / (TASKS.length)) * 100;
+  document.getElementById("prog").style.width = clamp(pct,0,100) + "%";
+  renderStickers();
+}
+function addStars(n){ state.stars += n; updateTop(); }
+function earnSticker(id){
+  if(!id) return;
+  if(!state.earned[id]){
+    state.earned[id] = true;
+    addStars(3); // bonus
+  }
+}
+function renderStickers(){
+  const box = document.getElementById("stickers");
+  box.innerHTML = "";
+  STICKERS.forEach(s=>{
+    const pill = document.createElement("div");
+    pill.className = "st" + (state.earned[s.id] ? " on" : "");
+    pill.textContent = s.label;
+    box.appendChild(pill);
+  });
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return false;
+  try{
+    const obj = JSON.parse(raw);
+    if(!obj || typeof obj !== "object") return false;
+    state = obj;
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+function reset(){
+  state = { i:0, stars:0, earned:{}, train:"כללי", answers:{} };
+  save();
+  updateTop();
+  render();
+}
+
+/* ---------------------------
+   Render tasks
+----------------------------*/
+const main = document.getElementById("main");
+
+function header(t){
+  const wrap = document.createElement("div");
+  const h2 = document.createElement("h2");
+  h2.textContent = t.title || "";
+  const meta = document.createElement("div");
+  meta.className = "muted";
+  meta.innerHTML = `נושא: <span class="badge">${esc(t.module)}</span>`;
+  wrap.appendChild(h2);
+  wrap.appendChild(meta);
+  return wrap;
+}
+
+function toast(kind, html){
+  const t=document.createElement("div");
+  t.className="toast "+kind;
+  t.innerHTML=html;
+  return t;
+}
+
+function nextBtn(label="המשך"){
+  const row = document.createElement("div");
+  row.className="btnrow";
+  const b = document.createElement("button");
+  b.className="primary";
+  b.textContent = label;
+  b.onclick = ()=>{
+    state.i += 1;
+    if(state.i >= TASKS.length){
+      renderFinish();
+    }else{
+      save();
+      updateTop();
+      render();
+    }
+  };
+  row.appendChild(b);
+  return row;
+}
+
+function backBtn(){
+  const b = document.createElement("button");
+  b.textContent = "חזרה";
+  b.onclick = ()=>{
+    state.i = Math.max(0, state.i-1);
+    save(); updateTop(); render();
+  };
+  return b;
+}
+
+function render(){
+  const t = TASKS[state.i];
+  main.innerHTML = "";
+  main.appendChild(header(t));
+
+  if(t.kind === "mcq") renderMCQ(t);
+  else if(t.kind === "chooseTrain") renderChooseTrain(t);
+  else if(t.kind === "trainTest") renderTrainTest(t);
+  else if(t.kind === "comparePrompts") renderComparePrompts(t);
+  else if(t.kind === "buildPrompt") renderBuildPrompt(t);
+  else if(t.kind === "reflection") renderReflection(t);
+  else {
+    main.appendChild(toast("bad","משימה לא מוכרת."));
+  }
+
+  const controls = document.createElement("div");
+  controls.className = "btnrow";
+  if(state.i > 0) controls.appendChild(backBtn());
+  const skip = document.createElement("button");
+  skip.textContent = "דלג/י";
+  skip.onclick = ()=>{ state.i += 1; save(); updateTop(); render(); };
+  controls.appendChild(skip);
+  main.appendChild(controls);
+}
+
+function lockChoices(grid){
+  [...grid.querySelectorAll(".choice")].forEach(el=>{ el.style.pointerEvents="none"; el.style.opacity=".95"; });
+}
+
+function renderMCQ(t){
+  const q = document.createElement("div");
+  q.className = "big";
+  q.innerHTML = `שאלה: <span class="kbd">${esc(t.q)}</span>`;
+  main.appendChild(q);
+
+  const grid = document.createElement("div");
+  grid.className = "choicegrid";
+
+  t.options.forEach(opt=>{
+    const c = document.createElement("div");
+    c.className = "choice";
+    c.innerHTML = `<span><b>${esc(opt)}</b></span><span class="tag">בחירה</span>`;
+    c.onclick = ()=>{
+      lockChoices(grid);
+      const ok = (opt === t.correct);
+      c.classList.add(ok ? "correct" : "wrong");
+      if(ok){
+        addStars(6);
+        earnSticker(t.sticker);
+        main.appendChild(toast("good", `<b>נכון!</b> ${esc(t.why)}<br/>+6 ⭐`));
+      }else{
+        main.appendChild(toast("bad", `<b>כמעט.</b> התשובה המתאימה: <b>${esc(t.correct)}</b><br/><span class="muted">${esc(t.why)}</span>`));
+      }
+      state.answers[state.i] = {answer: opt, correct: ok};
+      save();
+      main.appendChild(nextBtn("למשימה הבאה"));
+    };
+    grid.appendChild(c);
+  });
+  main.appendChild(grid);
+}
+
+function renderChooseTrain(t){
+  const q = document.createElement("div");
+  q.className = "big";
+  q.textContent = t.q;
+  main.appendChild(q);
+
+  const grid = document.createElement("div");
+  grid.className = "choicegrid";
+
+  t.trainOptions.forEach(opt=>{
+    const c = document.createElement("div");
+    c.className = "choice";
+    c.innerHTML = `<span><b>${esc(opt.label)}</b><div class="muted" style="font-size:12px;margin-top:3px;">${esc(opt.hint)}</div></span><span class="tag">אימון</span>`;
+    c.onclick = ()=>{
+      lockChoices(grid);
+      state.train = opt.key;
+      addStars(5);
+      earnSticker(t.sticker);
+      state.answers[state.i] = {train: opt.key};
+      save();
+      c.classList.add("correct");
+      main.appendChild(toast("good", `<b>נבחר אימון:</b> ${esc(opt.label)}<br/>עכשיו נראה איך זה משפיע. +5 ⭐`));
+      main.appendChild(nextBtn("לבדיקה"));
+    };
+    grid.appendChild(c);
+  });
+  main.appendChild(grid);
+  main.appendChild(toast("warn", "<b>רעיון חשוב:</b> אימון = הרבה דוגמאות. מה שרואים הרבה — משפיע על הניחושים."));
+}
+
+function renderTrainTest(t){
+  const q = document.createElement("div");
+  q.className = "big";
+  q.innerHTML = `בדיקה: <span class="kbd">${esc(t.q)}</span>`;
+  main.appendChild(q);
+
+  const out = t.outputs[state.train] || t.outputs["כללי"];
+  const box = document.createElement("div");
+  box.className = "toast warn";
+  box.innerHTML = `
+    הבינה (אחרי אימון על <b>${esc(state.train)}</b>) כנראה תכתוב: <span class="kbd">${esc(out.text)}</span><br/>
+    <span class="muted">${esc(out.reason)}</span>
+  `;
+  main.appendChild(box);
+
+  main.appendChild(toast("warn", `<b>תובנה:</b> ${esc(t.why)}`));
+
+  const row = document.createElement("div");
+  row.className = "btnrow";
+  const change = document.createElement("button");
+  change.textContent = "לשנות אימון";
+  change.onclick = ()=>{
+    // go back to chooseTrain task (previous)
+    state.i = Math.max(0, state.i-1);
+    save(); updateTop(); render();
+  };
+  row.appendChild(change);
+  row.appendChild(nextBtn("לניסוח בקשה"));
+  main.appendChild(row);
+}
+
+function renderComparePrompts(t){
+  const p = document.createElement("div");
+  p.className = "big";
+  p.textContent = "קרא/י שתי בקשות. איזו תיתן תוצאה טובה יותר?";
+  main.appendChild(p);
+
+  const cols = document.createElement("div");
+  cols.className = "twoCol";
+
+  const a = document.createElement("div");
+  a.className = "toast bad";
+  a.innerHTML = `<b>${esc(t.left.title)}:</b><br/><span class="kbd">${esc(t.left.text)}</span>`;
+  const b = document.createElement("div");
+  b.className = "toast good";
+  b.innerHTML = `<b>${esc(t.right.title)}:</b><br/><span class="kbd">${esc(t.right.text)}</span>`;
+  cols.appendChild(a); cols.appendChild(b);
+  main.appendChild(cols);
+
+  main.appendChild(toast("warn", esc(t.note)));
+
+  const grid = document.createElement("div");
+  grid.className = "choicegrid";
+
+  const opt1 = "הבקשה הכללית";
+  const opt2 = "הבקשה הברורה";
+
+  [opt1,opt2].forEach(opt=>{
+    const c = document.createElement("div");
+    c.className = "choice";
+    c.innerHTML = `<span><b>${esc(opt)}</b></span><span class="tag">בחירה</span>`;
+    c.onclick = ()=>{
+      lockChoices(grid);
+      const ok = (opt === opt2);
+      c.classList.add(ok ? "correct" : "wrong");
+      if(ok){
+        addStars(6);
+        earnSticker(t.sticker);
+        main.appendChild(toast("good", "<b>נכון!</b> בקשה ברורה עוזרת לבינה לנחש טוב יותר. +6 ⭐"));
+      }else{
+        main.appendChild(toast("bad", "<b>כמעט.</b> בקשה ברורה בדרך כלל תיתן תוצאה טובה יותר."));
+      }
+      state.answers[state.i] = {choice: opt, correct: ok};
+      save();
+      main.appendChild(nextBtn("להמשך"));
+    };
+    grid.appendChild(c);
+  });
+  main.appendChild(grid);
+}
+
+function renderBuildPrompt(t){
+  const p = document.createElement("div");
+  p.className = "big";
+  p.textContent = t.q;
+  main.appendChild(p);
+
+  const form = document.createElement("div");
+  form.className = "divider";
+
+  const container = document.createElement("div");
+  container.className = "twoCol";
+
+  const values = state.answers[state.i]?.values || {};
+
+  t.fields.forEach(f=>{
+    const block = document.createElement("div");
+    const label = document.createElement("div");
+    label.className = "muted";
+    label.style.marginBottom = "6px";
+    label.textContent = f.label;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = f.placeholder || "";
+    input.value = values[f.id] || "";
+    input.oninput = ()=>{
+      values[f.id] = input.value;
+      state.answers[state.i] = {values};
+      save();
+    };
+
+    block.appendChild(label);
+    block.appendChild(input);
+    container.appendChild(block);
+  });
+
+  main.appendChild(container);
+
+  const preview = document.createElement("div");
+  preview.className = "toast warn";
+  preview.style.marginTop = "12px";
+  preview.innerHTML = "<b>תצוגה מקדימה של הבקשה שלך:</b><div id='previewText' class='muted' style='margin-top:6px;'></div>";
+  main.appendChild(preview);
+
+  function updatePreview(){
+    const topic = (values.topic || "").trim();
+    const count = (values.count || "").trim();
+    const style = (values.style || "").trim();
+    const details = (values.details || "").trim();
+
+    const parts = [];
+    if(topic) parts.push(`על נושא: ${esc(topic)}`);
+    if(count) parts.push(`כמות: ${esc(count)}`);
+    if(style) parts.push(`סגנון: ${esc(style)}`);
+    if(details) parts.push(`חייב לכלול: ${esc(details)}`);
+
+    const text = parts.length ? ("תן/י לי " + parts.join(" · ")) : "התחל/י למלא כדי לראות תצוגה מקדימה…";
+    document.getElementById("previewText").innerHTML = `<span class="kbd">${text}</span>`;
+  }
+  updatePreview();
+
+  // update preview on every save (simple timer)
+  const timer = setInterval(updatePreview, 300);
+
+  const check = document.createElement("button");
+  check.className = "primary";
+  check.textContent = "בדיקה: הבקשה שלי ברורה?";
+  check.onclick = ()=>{
+    const topic = (values.topic || "").trim();
+    const count = (values.count || "").trim();
+    const style = (values.style || "").trim();
+    const details = (values.details || "").trim();
+    const ok = !!(topic && count && style);
+
+    if(ok){
+      addStars(8);
+      earnSticker(t.sticker);
+      main.appendChild(toast("good", `<b>יפה!</b> הבקשה ברורה: יש נושא + כמות + סגנון. <br/>+8 ⭐`));
+    }else{
+      main.appendChild(toast("bad", `<b>עוד קצת.</b> נסו למלא לפחות: נושא + כמה דברים + סגנון.<br/><span class="muted">${esc(t.checkHint)}</span>`));
+    }
+    clearInterval(timer);
+    main.appendChild(nextBtn("להמשך"));
+  };
+  main.appendChild(check);
+
+  main.appendChild(toast("warn", "<b>טיפ:</b> אפשר לכתוב גם “תן/י לי 3 אפשרויות” או “כתוב/י 5 משפטים” — זה עוזר מאוד."));
+}
+
+function renderReflection(t){
+  const p = document.createElement("div");
+  p.className = "big";
+  p.textContent = t.q;
+  main.appendChild(p);
+
+  const saved = state.answers[state.i]?.text || "";
+
+  const hints = document.createElement("div");
+  hints.className = "toast warn";
+  hints.innerHTML = `<b>עזרה:</b><ul class="smalllist">${t.prompts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+  main.appendChild(hints);
+
+  const ta = document.createElement("textarea");
+  ta.placeholder = "כתוב/י כאן…";
+  ta.value = saved;
+  ta.oninput = ()=>{
+    state.answers[state.i] = {text: ta.value};
+    save();
+  };
+  main.appendChild(ta);
+
+  const done = document.createElement("button");
+  done.className = "primary";
+  done.textContent = "סיימתי את הסיכום";
+  done.onclick = ()=>{
+    if((ta.value || "").trim().length >= 15){
+      addStars(10);
+      earnSticker(t.sticker);
+      main.appendChild(toast("good", "<b>כל הכבוד!</b> השלמת סיכום אישי. +10 ⭐"));
+    }else{
+      main.appendChild(toast("warn", "<b>כמעט.</b> נסו להוסיף עוד משפט אחד (לפחות 15 תווים)."));
+      return;
+    }
+    save();
+    main.appendChild(nextBtn("לסיום"));
+  };
+  main.appendChild(done);
+}
+
+/* ---------------------------
+   Finish
+----------------------------*/
+function renderFinish(){
+  main.innerHTML = "";
+  const doneCount = Object.keys(state.earned).length;
+  const all = doneCount === STICKERS.length;
+
+  const h = document.createElement("h2");
+  h.textContent = "סיום! 👏";
+  main.appendChild(h);
+
+  main.appendChild(toast(all ? "good" : "warn",
+    `<b>תוצאה:</b> ${state.stars} ⭐<br/>
+     <span class="muted">מדבקות: ${doneCount}/${STICKERS.length} ${all ? "— אספת את כולן!" : ""}</span>`
+  ));
+
+  const recap = document.createElement("div");
+  recap.className = "toast warn";
+  recap.innerHTML = `<b>מה חשוב לזכור:</b>
+    <ul class="smalllist">
+      <li>הבינה לומדת <b>דפוסים</b> מהמון דוגמאות.</li>
+      <li>היא <b>מנחשת</b> מה מתאים להמשך.</li>
+      <li>האימון (מה היא ראתה) משפיע על התשובות.</li>
+      <li>בקשה ברורה = תוצאה טובה יותר.</li>
+      <li>כשצריך עובדה מדויקת/עכשווית — <b>בודקים מקור</b>.</li>
+    </ul>`;
+  main.appendChild(recap);
+
+  const exportBox = document.createElement("div");
+  exportBox.className = "toast";
+  exportBox.innerHTML = `<b>דוח קצר להעתקה (אופציונלי):</b><div class="muted" style="margin-top:6px;">אפשר להעתיק ולהדביק למחברת/קלאסרום.</div>`;
+  const out = document.createElement("textarea");
+  out.value = buildReportText();
+  exportBox.appendChild(out);
+
+  const row = document.createElement("div");
+  row.className = "btnrow";
+
+  const copy = document.createElement("button");
+  copy.className = "primary";
+  copy.textContent = "העתק דוח";
+  copy.onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(out.value);
+      exportBox.appendChild(toast("good","הועתק!"));
+    }catch(e){
+      exportBox.appendChild(toast("warn","לא הצלחתי להעתיק אוטומטית. אפשר לסמן ולהעתיק ידנית."));
+    }
+  };
+
+  const again = document.createElement("button");
+  again.textContent = "שחק/י שוב";
+  again.onclick = reset;
+
+  row.appendChild(copy);
+  row.appendChild(again);
+  exportBox.appendChild(row);
+
+  main.appendChild(exportBox);
+
+  document.getElementById("prog").style.width = "100%";
+  document.getElementById("task").textContent = TASKS.length;
+  save();
+}
+
+function buildReportText(){
+  const lines = [];
+  lines.push("דוח משחקון: איך בינה עובדת (כיתות ג׳–ד׳)");
+  lines.push("כוכבים: " + state.stars);
+  lines.push("אימון שנבחר: " + state.train);
+  lines.push("מדבקות: " + Object.keys(state.earned).join(", "));
+  lines.push("");
+  // include prompt (task 10) and reflection (task 12) if exists
+  const promptTaskIndex = TASKS.findIndex(t=>t.kind==="buildPrompt");
+  if(promptTaskIndex >= 0){
+    const v = state.answers[promptTaskIndex]?.values || {};
+    const parts = [];
+    if(v.topic) parts.push("נושא: " + v.topic);
+    if(v.count) parts.push("כמות: " + v.count);
+    if(v.style) parts.push("סגנון: " + v.style);
+    if(v.details) parts.push("פרטים: " + v.details);
+    if(parts.length){
+      lines.push("הבקשה שבניתי:");
+      lines.push("- " + parts.join(" | "));
+      lines.push("");
+    }
+  }
+  const reflIndex = TASKS.findIndex(t=>t.kind==="reflection");
+  if(reflIndex >= 0){
+    const text = (state.answers[reflIndex]?.text || "").trim();
+    if(text){
+      lines.push("סיכום אישי:");
+      lines.push(text);
+    }
+  }
+  return lines.join("\n");
+}
+
+/* ---------------------------
+   Buttons
+----------------------------*/
+document.getElementById("saveBtn").onclick = ()=>{ save(); alert("נשמר."); };
+document.getElementById("loadBtn").onclick = ()=>{
+  const ok = load();
+  if(ok){ updateTop(); render(); alert("נטען."); }
+  else alert("אין שמירה קודמת במחשב הזה.");
+};
+document.getElementById("resetBtn").onclick = ()=>{
+  if(confirm("לאפס את המשחקון?")) reset();
+};
+
+/* init */
+load(); // try auto-load if exists
+updateTop();
+render();
+</script>
+</body>
+</html>
